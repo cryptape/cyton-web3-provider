@@ -66,60 +66,75 @@ ProviderEngine.prototype.setHost = function (host) {
   this._providers[length - 1].provider.host = host;
 }
 
-ProviderEngine.prototype.send = function (payload) {
-  const self = this
-
-  let result = null
+ProviderEngine.prototype.sendRpc = function (payload) {
+  var self = this;
   switch (payload.method) {
 
     case 'eth_accounts':
-      let address = globalSyncOptions.address
-      result = address ? [address] : []
-      break
-
+      var address = globalSyncOptions.address;
+      return {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result: address ? [address] : []
+      };
+    
     case 'eth_coinbase':
-      result = globalSyncOptions.address || null
-      break
-
+    return {
+      id: payload.id,
+      jsonrpc: payload.jsonrpc,
+      result: globalSyncOptions.address || null
+    };
+    
     case 'eth_uninstallFilter':
-      self.sendAsync(payload, noop)
-      result = true
-      break
+      self.sendAsync(payload, (error, rep) => {
+        return {
+          id: payload.id,
+          jsonrpc: payload.jsonrpc,
+          result: true
+        };
+      });
 
     case 'net_version':
-      result = globalSyncOptions.networkVersion || null
-      break
-
+    return {
+      id: payload.id,
+      jsonrpc: payload.jsonrpc,
+      result: globalSyncOptions.networkVersion || null
+    };
+    
     case 'net_listening':
       try {
-        self._providers.filter(p => p.provider !== undefined)[0].provider.send(payload)
-        result = true
+        self._providers.filter(function (p) {
+          return p.provider !== undefined;
+        })[0].provider.send(payload);
+        return {
+          id: payload.id,
+          jsonrpc: payload.jsonrpc,
+          result: true
+        };
       } catch (e) {
-        result = false
-      }
-      break
-
+        return {
+          id: payload.id,
+          jsonrpc: payload.jsonrpc,
+          result: false
+        };
+      };
+      break;
+    
     // throw not-supported Error
     default:
-      var message = `The Neuron Web3 object does not support synchronous methods like ${payload.method} without a callback parameter.`
-      throw new Error(message)
+      var message = 'The Cyton Web3 object does not support synchronous methods like ' + payload.method + ' without a callback parameter.';
+      throw new Error(message);
   }
-  // return the result
-  return {
-    id: payload.id,
-    jsonrpc: payload.jsonrpc,
-    result: result,
-  }
-}
+};
 
 ProviderEngine.prototype.isConnected = function () {
-    return this.send({
-        id: 9999999999,
-        jsonrpc: '2.0',
-        method: 'net_listening',
-        params: []
-    }).result
-}
+  return this.sendRpc({
+    id: 9999999999,
+    jsonrpc: '2.0',
+    method: 'net_listening',
+    params: []
+  }).result;
+};
 
 module.exports = Neuron
 
