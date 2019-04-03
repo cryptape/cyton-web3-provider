@@ -1,8 +1,8 @@
-# NeuronWeb3Provider
+# CytonWeb3Provider
 
 ## How to Identify Trust Provider
 
-If neuron provider injected properly `isNeuron` will be `true`
+If cyton provider injected properly `isNeuron` will be `true`
 
 ```javascript
  web3.currentProvider.isNeuron
@@ -10,4 +10,4 @@ If neuron provider injected properly `isNeuron` will be `true`
 
 ## License
 
-NeuronWeb3Provider is available under the MIT license. See the LICENSE file for more info.
+CytonWeb3Provider is available under the MIT license. See the LICENSE file for more info.
